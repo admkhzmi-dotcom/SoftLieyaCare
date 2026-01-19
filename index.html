@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0B1020" />
+  <title>SoftLieya Care</title>
+
+  <!-- GitHub Pages (repo path) safe -->
+  <link rel="manifest" href="./app.webmanifest">
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">S</div>
+      <div class="brand-text">
+        <div class="brand-title">SoftLieya Care</div>
+        <div class="brand-sub">Private • Gentle • Premium</div>
+      </div>
+    </div>
+
+    <div class="topbar-actions">
+      <button id="btnOpenSettings" class="btn ghost" type="button">Settings</button>
+      <button id="btnSignOut" class="btn ghost" type="button" hidden>Sign out</button>
+    </div>
+  </header>
+
+  <main class="app">
+    <!-- AUTH -->
+    <section id="authView" class="view auth">
+      <div class="card auth-card">
+        <h1 class="h1">Welcome.</h1>
+        <p class="muted">
+          SoftLieya Care is a private, gentle companion. No tracking. No control.
+        </p>
+
+        <div class="auth-grid">
+          <form id="signInForm" class="panel">
+            <h2 class="h2">Sign in</h2>
+
+            <label class="field">
+              <span>Email</span>
+              <input name="email" type="email" placeholder="you@example.com" required />
+            </label>
+
+            <label class="field">
+              <span>Password</span>
+              <input name="password" type="password" placeholder="••••••••" required />
+            </label>
+
+            <button class="btn primary" type="submit">Sign in</button>
+            <p class="tiny muted">New here? Create an account on the right.</p>
+          </form>
+
+          <form id="signUpForm" class="panel">
+            <h2 class="h2">Create account</h2>
+
+            <label class="field">
+              <span>Name</span>
+              <input name="name" type="text" value="Lieya" required />
+            </label>
+
+            <label class="field">
+              <span>Email</span>
+              <input name="email" type="email" placeholder="you@example.com" required />
+            </label>
+
+            <label class="field">
+              <span>Password</span>
+              <input name="password" type="password" minlength="6" placeholder="Min 6 characters" required />
+            </label>
+
+            <button class="btn primary" type="submit">Create account</button>
+            <p class="tiny muted">Your data is private to your account.</p>
+          </form>
+        </div>
+
+        <div id="authError" class="alert danger" hidden></div>
+      </div>
+    </section>
+
+    <!-- APP -->
+    <section id="appView" class="view" hidden>
+      <div id="screen" class="screen"></div>
+
+      <nav class="bottom-nav" aria-label="Primary">
+        <a class="nav-item" href="#/home" data-route="home">Home</a>
+        <a class="nav-item" href="#/care" data-route="care">Care</a>
+        <a class="nav-item" href="#/notes" data-route="notes">Notes</a>
+        <a class="nav-item" href="#/safety" data-route="safety">Safety</a>
+      </nav>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <div id="popupOverlay" class="overlay" hidden>
+    <div class="popup card">
+      <div class="popup-head">
+        <div class="popup-title" id="popupTitle">A gentle check-in</div>
+        <button class="btn ghost" id="popupClose" type="button">Close</button>
+      </div>
+      <div class="popup-body" id="popupText"></div>
+      <div class="popup-actions">
+        <button class="btn" id="popupSnooze" type="button">Snooze</button>
+        <button class="btn primary" id="popupOk" type="button">Okay</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="settingsOverlay" class="overlay" hidden>
+    <div class="modal card">
+      <div class="modal-head">
+        <div class="modal-title">Settings</div>
+        <button class="btn ghost" id="btnCloseSettings" type="button">Close</button>
+      </div>
+      <div class="modal-body" id="settingsBody"></div>
+    </div>
+  </div>
+
+  <!-- config must load first -->
+  <script src="./config.js"></script>
+  <script type="module" src="./main.js"></script>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("./sw.js").catch(()=>{});
+    }
+  </script>
+</body>
+</html>
