@@ -1,4 +1,4 @@
-const CACHE = "softlieya-v7"; // bump this when you deploy
+const CACHE = "softlieya-v8"; // bump this when you deploy
 const ASSETS = [
   "./",
   "./index.html",
@@ -27,7 +27,7 @@ self.addEventListener("install", (e) => {
   e.waitUntil((async () => {
     const cache = await caches.open(CACHE);
 
-    // Add assets one-by-one so a single 404 won't break the whole install
+    // Add assets one-by-one so a single 404 won't break install
     await Promise.allSettled(
       ASSETS.map((url) => cache.add(url))
     );
@@ -54,7 +54,7 @@ self.addEventListener("fetch", (e) => {
   const path = url.pathname;
   const isHTML = req.mode === "navigate" || path.endsWith(".html") || path.endsWith("/");
 
-  // 1) HTML: Network-first (so new deploys show up)
+  // HTML: Network-first (so new deploys reflect)
   if (isHTML) {
     e.respondWith((async () => {
       try {
@@ -70,20 +70,18 @@ self.addEventListener("fetch", (e) => {
     return;
   }
 
-  // 2) Static assets: Stale-While-Revalidate
+  // Static assets: Stale-while-revalidate
   e.respondWith((async () => {
     const cached = await caches.match(req);
     const cache = await caches.open(CACHE);
 
     const fetchPromise = fetch(req)
       .then((res) => {
-        // only cache successful basic responses
         if (res && res.ok) cache.put(req, res.clone());
         return res;
       })
       .catch(() => null);
 
-    // return cached immediately, update in background
     return cached || (await fetchPromise) || new Response("", { status: 504 });
   })());
 });
