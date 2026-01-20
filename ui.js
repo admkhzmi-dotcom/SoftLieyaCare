@@ -103,9 +103,39 @@ export function hideSettingsModal(){
   closeModal();
 }
 
-/* Popup close helper (used by main.js) */
+/* ===== Popup (used by scheduler.js) =====
+   scheduler.js calls:
+   showPopup({ title: "...", text: "..." })
+*/
+export function showPopup({ title = "Reminder", text = "", body = "", okText = "Okay", snoozeText = "Snooze" } = {}){
+  const overlay = document.getElementById("popupOverlay");
+  const bodyEl  = document.getElementById("popupBody");
+  const okBtn   = document.getElementById("popupOk");
+  const snoozeBtn = document.getElementById("popupSnooze");
+
+  if (!overlay) return;
+
+  // Title (popup shares modal styles)
+  const headerTitle = overlay.querySelector(".modal-title");
+  if (headerTitle) headerTitle.textContent = title;
+
+  // Content: prefer HTML body if provided, else plain text
+  if (bodyEl){
+    if (body) bodyEl.innerHTML = body;
+    else bodyEl.textContent = text || "";
+  }
+
+  if (okBtn) okBtn.textContent = okText;
+  if (snoozeBtn) snoozeBtn.textContent = snoozeText;
+
+  overlay.classList.add("show");
+  overlay.setAttribute("aria-hidden", "false");
+}
+
 export function hidePopup(){
-  document.getElementById("popupOverlay")?.classList.remove("show");
+  const overlay = document.getElementById("popupOverlay");
+  overlay?.classList.remove("show");
+  overlay?.setAttribute("aria-hidden", "true");
 }
 
 /* Router expects this export: setActiveNav(routeKey) */
