@@ -3,11 +3,13 @@ import { renderHome } from "./home.js";
 import { renderCare } from "./care.js";
 import { renderNotes } from "./notes.js";
 import { renderSafety } from "./safety.js";
+import { renderQuran } from "./quran.js";
 
 const routes = {
   home: renderHome,
   care: renderCare,
   notes: renderNotes,
+  quran: renderQuran,
   safety: renderSafety
 };
 
