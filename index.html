@@ -81,12 +81,14 @@
             <p class="tiny muted">Your data is private to your account.</p>
           </form>
         </div>
+
+        <!-- ✅ Auth error message used by auth.js -->
+        <p id="authError" class="tiny" style="color:#B42318; margin-top:12px" hidden></p>
       </div>
     </section>
 
     <!-- APP -->
     <section id="appView" class="view" hidden>
-      <!-- Router can render into #screen OR #routeOutlet (your ctx() handles fallback) -->
       <div id="screen"></div>
     </section>
   </main>
@@ -94,7 +96,7 @@
   <!-- Toast -->
   <div id="toast" class="toast" aria-live="polite" aria-atomic="true"></div>
 
-  <!-- OPTIONAL Popup (if your popup system uses these IDs) -->
+  <!-- OPTIONAL Popup (if scheduler/popup uses these IDs) -->
   <div id="popupOverlay" class="modal-overlay" aria-hidden="true" style="z-index:9998">
     <div class="modal-sheet" role="dialog" aria-modal="true">
       <div class="modal-header">
