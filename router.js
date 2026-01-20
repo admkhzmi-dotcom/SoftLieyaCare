@@ -20,14 +20,23 @@ function parseRoute(){
 }
 
 export function startRouter(ctx){
+  const backBtn = document.getElementById("btnBack");
+
   function go(){
     const r = parseRoute();
     const fn = routes[r] || routes.home;
+
     setActiveNav(r);
+
+    if (backBtn){
+      backBtn.hidden = (r === "home");
+    }
+
     fn(ctx);
   }
 
   window.addEventListener("hashchange", go);
+
   if(!location.hash) location.hash = "#/home";
   go();
 
