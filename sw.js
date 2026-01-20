@@ -1,40 +1,36 @@
-const CACHE = "softlieya-v3"; // bump version to force refresh
+const CACHE = "softlieya-v5";
 const ASSETS = [
-  // The root page (GitHub Pages entry)
   "./",
+  "./index.html",
+  "./styles.css",
+  "./app.webmanifest",
+  "./apple-touch-icon.png",
 
-  // App files live in /SoftLieyaCare/ folder
-  "./SoftLieyaCare/index.html",
-  "./SoftLieyaCare/styles.css",
-  "./SoftLieyaCare/config.js",
-  "./SoftLieyaCare/main.js",
-  "./SoftLieyaCare/router.js",
-  "./SoftLieyaCare/ui.js",
-  "./SoftLieyaCare/auth.js",
-  "./SoftLieyaCare/db.js",
-  "./SoftLieyaCare/toneEngine.js",
-  "./SoftLieyaCare/scheduler.js",
-  "./SoftLieyaCare/home.js",
-  "./SoftLieyaCare/care.js",
-  "./SoftLieyaCare/notes.js",
-  "./SoftLieyaCare/safety.js",
-  "./SoftLieyaCare/settings.js",
-  "./SoftLieyaCare/app.webmanifest",
-  "./SoftLieyaCare/apple-touch-icon.png"
+  "./config.js",
+  "./main.js",
+  "./router.js",
+  "./ui.js",
+  "./settings.js",
+  "./quranMotivation.js",
+  "./scheduler.js",
+  "./toneEngine.js",
+  "./auth.js",
+  "./db.js",
+  "./home.js",
+  "./care.js",
+  "./notes.js",
+  "./safety.js",
+  "./settingsView.js"
 ];
 
 self.addEventListener("install", (e) => {
-  e.waitUntil(
-    caches.open(CACHE)
-      .then((c) => c.addAll(ASSETS))
-      .catch(() => {})
-  );
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).catch(()=>{}));
 });
 
 self.addEventListener("activate", (e) => {
   e.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.map((k) => (k !== CACHE ? caches.delete(k) : null)))
+    caches.keys().then(keys =>
+      Promise.all(keys.map(k => (k !== CACHE ? caches.delete(k) : null)))
     )
   );
 });
@@ -44,6 +40,6 @@ self.addEventListener("fetch", (e) => {
   if (url.origin !== location.origin) return;
 
   e.respondWith(
-    caches.match(e.request).then((cached) => cached || fetch(e.request))
+    caches.match(e.request).then(cached => cached || fetch(e.request))
   );
 });
