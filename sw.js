@@ -1,4 +1,4 @@
-const CACHE = "softlieya-v5";
+const CACHE = "softlieya-v6";
 const ASSETS = [
   "./",
   "./index.html",
@@ -19,8 +19,8 @@ const ASSETS = [
   "./home.js",
   "./care.js",
   "./notes.js",
-  "./safety.js",
-  "./settingsView.js"
+  "./quran.js",
+  "./safety.js"
 ];
 
 self.addEventListener("install", (e) => {
@@ -38,8 +38,5 @@ self.addEventListener("activate", (e) => {
 self.addEventListener("fetch", (e) => {
   const url = new URL(e.request.url);
   if (url.origin !== location.origin) return;
-
-  e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
-  );
+  e.respondWith(caches.match(e.request).then(cached => cached || fetch(e.request)));
 });
