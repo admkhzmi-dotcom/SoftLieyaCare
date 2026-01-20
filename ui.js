@@ -127,7 +127,7 @@ export function showPopup({ title = "Reminder", text = "", body = "", okText = "
 
   if (okBtn) okBtn.textContent = okText;
   if (snoozeBtn) snoozeBtn.textContent = snoozeText;
-
+ 
   overlay.classList.add("show");
   overlay.setAttribute("aria-hidden", "false");
 }
