@@ -6,13 +6,11 @@
   <meta name="theme-color" content="#0B1020" />
   <title>SoftLieya Care</title>
 
-  <!-- GitHub Pages (repo path) safe: NO leading "/" and NO "./" -->
-  <link rel="manifest" href="app.webmanifest">
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css">
-
-  <!-- Optional: remove favicon 404 -->
-  <link rel="icon" type="image/png" href="apple-touch-icon.png">
+  <!-- All assets live inside /SoftLieyaCare/ folder -->
+  <link rel="manifest" href="SoftLieyaCare/app.webmanifest">
+  <link rel="apple-touch-icon" sizes="180x180" href="SoftLieyaCare/apple-touch-icon.png">
+  <link rel="stylesheet" href="SoftLieyaCare/styles.css">
+  <link rel="icon" type="image/png" href="SoftLieyaCare/apple-touch-icon.png">
 </head>
 
 <body>
@@ -98,10 +96,8 @@
     </section>
   </main>
 
-  <!-- Toast -->
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
-  <!-- Popup -->
   <div id="popupOverlay" class="overlay" hidden>
     <div class="popup card">
       <div class="popup-head">
@@ -116,7 +112,6 @@
     </div>
   </div>
 
-  <!-- Settings -->
   <div id="settingsOverlay" class="overlay" hidden>
     <div class="modal card">
       <div class="modal-head">
@@ -127,14 +122,14 @@
     </div>
   </div>
 
-  <!-- config must load before main -->
-  <script src="config.js"></script>
-  <script type="module" src="main.js"></script>
+  <!-- Load from folder -->
+  <script src="SoftLieyaCare/config.js"></script>
+  <script type="module" src="SoftLieyaCare/main.js"></script>
 
-  <!-- Service worker (disable while debugging if CSS/manifest issues persist) -->
+  <!-- Service Worker also lives in folder -->
   <script>
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("sw.js").catch(()=>{});
+      navigator.serviceWorker.register("SoftLieyaCare/sw.js").catch(()=>{});
     }
   </script>
 </body>
