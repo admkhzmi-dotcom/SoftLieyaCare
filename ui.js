@@ -18,6 +18,18 @@ export function showToast(text){
   toastTimer = setTimeout(() => el.classList.remove("show"), 1400);
 }
 
+/* Auth error helpers (matches auth.js imports) */
+export function showError(message){
+  const el = document.getElementById("authError");
+  if (!el) return;
+  el.textContent = message || "";
+  el.hidden = !message;
+}
+
+export function clearError(){
+  showError("");
+}
+
 /* Modal system (iOS + in-app browsers safe) */
 export function initModalSystem(){
   if (modalInitialized) return;
@@ -83,7 +95,7 @@ export function closeModal(){
   window.__slcCloseModal?.();
 }
 
-/* For older code compatibility */
+/* Backwards compatibility for older calls */
 export function showSettingsModal(html){
   openModal({ title: "Settings", html });
 }
@@ -91,7 +103,7 @@ export function hideSettingsModal(){
   closeModal();
 }
 
-/* Popup close helper (used by your main.js) */
+/* Popup close helper (used by main.js) */
 export function hidePopup(){
   document.getElementById("popupOverlay")?.classList.remove("show");
 }
@@ -109,15 +121,4 @@ export function setActiveNav(routeKey){
     if (active) el.setAttribute("aria-current", "page");
     else el.removeAttribute("aria-current");
   });
-}
-// Auth error helpers (safe even if element doesn't exist)
-export function setError(message){
-  const el = document.getElementById("authError");
-  if (!el) return;
-  el.textContent = message || "";
-  el.hidden = !message;
-}
-
-export function clearError(){
-  setError("");
 }
