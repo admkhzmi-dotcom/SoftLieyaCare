@@ -123,15 +123,16 @@
   </div>
 
   <!-- Load from folder -->
-  <script src="SoftLieyaCare/config.js"></script>
-  <script type="module" src="SoftLieyaCare/main.js"></script>
+  <script src="config.js"></script>
+  <script type="module" src="main.js"></script>
 
   <!-- Service Worker also lives in folder -->
   <script>
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("SoftLieyaCare/sw.js").catch(()=>{});
-    }
-  </script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js").catch(()=>{});
+  }
+</script>
 </body>
 </html>
+
 
