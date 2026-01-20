@@ -3,12 +3,12 @@ let modalInitialized = false;
 let toastTimer = null;
 let savedScrollY = 0;
 
-// ✅ selector helper used everywhere
+// Selector helper used throughout your app
 export function $(sel){
   return document.querySelector(sel);
 }
 
-// Simple toast
+/* Toast */
 export function showToast(text){
   const el = document.getElementById("toast");
   if (!el) return;
@@ -18,7 +18,7 @@ export function showToast(text){
   toastTimer = setTimeout(() => el.classList.remove("show"), 1400);
 }
 
-// Modal system (iOS/Edge safe)
+/* Modal system (iOS + in-app browsers safe) */
 export function initModalSystem(){
   if (modalInitialized) return;
   modalInitialized = true;
@@ -32,28 +32,32 @@ export function initModalSystem(){
     overlay.setAttribute("aria-hidden", "true");
     document.body.classList.remove("modal-open");
 
+    // Restore scroll (prevents iOS jump)
     if (savedScrollY) window.scrollTo(0, savedScrollY);
     savedScrollY = 0;
   }
 
+  // Close button: click + touchstart (important on iPhone/WhatsApp/Edge)
   closeBtn?.addEventListener("click", close);
   closeBtn?.addEventListener("touchstart", (e) => {
     e.preventDefault();
     close();
   }, { passive: false });
 
+  // Tap outside closes
   overlay?.addEventListener("click", (e) => {
     if (e.target === overlay) close();
   });
-
   overlay?.addEventListener("touchstart", (e) => {
     if (e.target === overlay) close();
   }, { passive: true });
 
+  // Escape key (desktop)
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") close();
   });
 
+  // Expose for modules that want to close programmatically
   window.__slcCloseModal = close;
 }
 
@@ -64,6 +68,7 @@ export function openModal({ title = "Modal", html = "" }){
 
   if (!overlay || !titleEl || !bodyEl) return;
 
+  // Save scroll (iOS) then lock
   savedScrollY = window.scrollY || 0;
 
   titleEl.textContent = title;
@@ -78,7 +83,7 @@ export function closeModal(){
   window.__slcCloseModal?.();
 }
 
-// Backwards compatibility (if old code calls these)
+/* For older code compatibility */
 export function showSettingsModal(html){
   openModal({ title: "Settings", html });
 }
@@ -86,7 +91,22 @@ export function hideSettingsModal(){
   closeModal();
 }
 
-// If your old code expects popups, keep no-op safe stubs
+/* Popup close helper (used by your main.js) */
 export function hidePopup(){
   document.getElementById("popupOverlay")?.classList.remove("show");
+}
+
+/* Router expects this export: setActiveNav(routeKey) */
+export function setActiveNav(routeKey){
+  const key = String(routeKey || "home").toLowerCase();
+
+  document.querySelectorAll("[data-nav]").forEach(el => {
+    const target = String(el.getAttribute("data-nav") || "").toLowerCase();
+    const active = target === key;
+
+    el.classList.toggle("active", active);
+
+    if (active) el.setAttribute("aria-current", "page");
+    else el.removeAttribute("aria-current");
+  });
 }
