@@ -1,93 +1,45 @@
-import {
-  doc, getDoc, setDoc, updateDoc, serverTimestamp,
-  collection, addDoc, query, orderBy, limit, getDocs
-} from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
-
-export const DEFAULT_PREFS = {
-  toneLevel: 1,
-  remindersEnabled: true,
-  quietHours: { start:"22:30", end:"08:30" },
-  dailyPopupLimit: 8,
-  popupCooldownMinutes: 45
-};
-
-export const DEFAULT_STATES = {
-  periodModeEnabled:false,
-  tiredModeEnabled:false,
-  goingOutActive:false,
-  goingOut:{ type:"quick", lastCheckInAt:"" }
-};
-
-export async function ensureUserDoc(db, user){
-  const ref = doc(db, "users", user.uid);
-  const snap = await getDoc(ref);
-  if(snap.exists()) return snap.data();
-
-  const data = {
-    profile:{
-      displayName: user.displayName || "Lieya",
-      createdAt: serverTimestamp(),
-      lastSeenAt: serverTimestamp()
-    },
-    preferences:{...DEFAULT_PREFS},
-    states:{...DEFAULT_STATES}
-  };
-
-  await setDoc(ref, data);
-  return data;
+function db(){
+  if(!window.SLC?.db) throw new Error("Firestore not ready. Check config.js");
+  return window.SLC.db;
+}
+function ts(){
+  return window.SLC.ts ? window.SLC.ts() : new Date();
 }
 
-export async function getUserBundle(db, uid){
-  const snap = await getDoc(doc(db,"users",uid));
-  return snap.exists() ? snap.data() : null;
+export async function ensureUserDoc(uid, profile){
+  const ref = db().collection("users").doc(uid);
+  const snap = await ref.get();
+  if(!snap.exists){
+    await ref.set({
+      createdAt: ts(),
+      displayName: profile?.displayName || "Lieya",
+      email: profile?.email || ""
+    });
+  }
 }
 
-export async function touchLastSeen(db, uid){
-  await updateDoc(doc(db,"users",uid), {"profile.lastSeenAt": serverTimestamp()});
+export async function addMealLog(uid, { text, note="" }){
+  const ref = db().collection("users").doc(uid).collection("mealLogs").doc();
+  await ref.set({ text, note, createdAt: ts() });
 }
 
-export async function updateProfile(db, uid, patch){
-  await updateDoc(doc(db,"users",uid), {"profile.displayName": patch.displayName});
+export async function addWaterLog(uid, { amount="a few sips" }){
+  const ref = db().collection("users").doc(uid).collection("waterLogs").doc();
+  await ref.set({ amount, createdAt: ts() });
 }
 
-export async function updatePrefs(db, uid, prefs){
-  await updateDoc(doc(db,"users",uid), {preferences: prefs});
+export async function addRestLog(uid, { note="" }){
+  const ref = db().collection("users").doc(uid).collection("restLogs").doc();
+  await ref.set({ note, createdAt: ts() });
 }
 
-export async function updateStates(db, uid, states){
-  await updateDoc(doc(db,"users",uid), {states: states});
+export async function addNote(uid, { title="Note", body="" }){
+  const ref = db().collection("users").doc(uid).collection("notes").doc();
+  await ref.set({ title, body, createdAt: ts() });
 }
 
-export async function addMealLog(db, uid, mealType, size, note){
-  await addDoc(collection(db,"users",uid,"mealLogs"), {
-    timestamp: serverTimestamp(),
-    mealType, size, note: note || ""
-  });
-}
-
-export async function addSleepLog(db, uid, startISO, endISO, quality, note){
-  await addDoc(collection(db,"users",uid,"sleepLogs"), {
-    timestamp: serverTimestamp(),
-    sleepStart: startISO,
-    sleepEnd: endISO,
-    quality: Number(quality),
-    note: note || ""
-  });
-}
-
-export async function addNote(db, uid, moodTag, text){
-  await addDoc(collection(db,"users",uid,"notes"), {
-    timestamp: serverTimestamp(),
-    moodTag, text
-  });
-}
-
-export async function getRecent(db, uid, subcollection, n=6){
-  const q = query(
-    collection(db,"users",uid,subcollection),
-    orderBy("timestamp","desc"),
-    limit(n)
-  );
-  const snaps = await getDocs(q);
-  return snaps.docs.map(d => ({id:d.id, ...d.data()}));
+export async function listNotes(uid, limit=20){
+  const qs = await db().collection("users").doc(uid).collection("notes")
+    .orderBy("createdAt","desc").limit(limit).get();
+  return qs.docs.map(d => ({ id:d.id, ...d.data() }));
 }
