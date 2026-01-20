@@ -6,11 +6,18 @@
   <meta name="theme-color" content="#0B1020" />
   <title>SoftLieya Care</title>
 
-  <!-- All assets live inside /SoftLieyaCare/ folder -->
   <link rel="manifest" href="app.webmanifest">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css">
   <link rel="icon" type="image/png" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Firebase (compat for simple no-build hosting) -->
+  <script defer src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+
+  <!-- Your config must load AFTER Firebase scripts -->
+  <script defer src="config.js"></script>
 </head>
 
 <body>
@@ -22,7 +29,6 @@
         <div class="brand-sub">Private • Gentle • Premium</div>
       </div>
     </div>
-
     <div class="topbar-actions">
       <button id="btnOpenSettings" class="btn ghost" type="button">Settings</button>
       <button id="btnSignOut" class="btn ghost" type="button" hidden>Sign out</button>
@@ -96,8 +102,10 @@
     </section>
   </main>
 
+  <!-- Toast -->
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
+  <!-- Popup -->
   <div id="popupOverlay" class="overlay" hidden>
     <div class="popup card">
       <div class="popup-head">
@@ -112,6 +120,7 @@
     </div>
   </div>
 
+  <!-- Settings Modal -->
   <div id="settingsOverlay" class="overlay" hidden>
     <div class="modal card">
       <div class="modal-head">
@@ -122,17 +131,12 @@
     </div>
   </div>
 
-  <!-- Load from folder -->
-  <script src="config.js"></script>
   <script type="module" src="main.js"></script>
 
-  <!-- Service Worker also lives in folder -->
   <script>
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("sw.js").catch(()=>{});
-  }
-</script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js").catch(()=>{});
+    }
+  </script>
 </body>
 </html>
-
-
