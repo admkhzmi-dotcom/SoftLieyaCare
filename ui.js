@@ -110,3 +110,14 @@ export function setActiveNav(routeKey){
     else el.removeAttribute("aria-current");
   });
 }
+// Auth error helpers (safe even if element doesn't exist)
+export function setError(message){
+  const el = document.getElementById("authError");
+  if (!el) return;
+  el.textContent = message || "";
+  el.hidden = !message;
+}
+
+export function clearError(){
+  setError("");
+}
