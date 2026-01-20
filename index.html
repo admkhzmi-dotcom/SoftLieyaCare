@@ -29,6 +29,7 @@
         <div class="brand-sub">Private • Gentle • Premium</div>
       </div>
     </div>
+
     <div class="topbar-actions">
       <button id="btnOpenSettings" class="btn ghost" type="button">Settings</button>
       <button id="btnSignOut" class="btn ghost" type="button" hidden>Sign out</button>
@@ -36,48 +37,50 @@
   </header>
 
   <main class="app">
-    <!-- AUTH -->
+    <!-- AUTH VIEW -->
     <section id="authView" class="view auth">
       <div class="card auth-card">
         <h1 class="h1">Welcome.</h1>
         <p class="muted">
-          SoftLieya Care is a private, gentle companion. No tracking. No control.
+          SoftLieya Care is a private, gentle companion — built for daily care, calm, and consistency.
         </p>
 
         <div class="auth-grid">
+          <!-- Sign in -->
           <form id="signInForm" class="panel">
             <h2 class="h2">Sign in</h2>
 
             <label class="field">
               <span>Email</span>
-              <input name="email" type="email" placeholder="you@example.com" required />
+              <input name="email" type="email" placeholder="you@example.com" autocomplete="email" required />
             </label>
 
             <label class="field">
               <span>Password</span>
-              <input name="password" type="password" placeholder="••••••••" required />
+              <input name="password" type="password" placeholder="••••••••" autocomplete="current-password" required />
             </label>
 
             <button class="btn primary" type="submit">Sign in</button>
             <p class="tiny muted">New here? Create an account on the right.</p>
           </form>
 
+          <!-- Sign up -->
           <form id="signUpForm" class="panel">
             <h2 class="h2">Create account</h2>
 
             <label class="field">
               <span>Name</span>
-              <input name="name" type="text" value="Lieya" required />
+              <input name="name" type="text" value="Lieya" autocomplete="name" required />
             </label>
 
             <label class="field">
               <span>Email</span>
-              <input name="email" type="email" placeholder="you@example.com" required />
+              <input name="email" type="email" placeholder="you@example.com" autocomplete="email" required />
             </label>
 
             <label class="field">
               <span>Password</span>
-              <input name="password" type="password" minlength="6" placeholder="Min 6 characters" required />
+              <input name="password" type="password" minlength="6" placeholder="Min 6 characters" autocomplete="new-password" required />
             </label>
 
             <button class="btn primary" type="submit">Create account</button>
@@ -89,7 +92,7 @@
       </div>
     </section>
 
-    <!-- APP -->
+    <!-- APP VIEW -->
     <section id="appView" class="view" hidden>
       <div id="screen" class="screen"></div>
 
@@ -97,6 +100,7 @@
         <a class="nav-item" href="#/home" data-route="home">Home</a>
         <a class="nav-item" href="#/care" data-route="care">Care</a>
         <a class="nav-item" href="#/notes" data-route="notes">Notes</a>
+        <a class="nav-item" href="#/quran" data-route="quran">Qur’an</a>
         <a class="nav-item" href="#/safety" data-route="safety">Safety</a>
       </nav>
     </section>
@@ -131,8 +135,10 @@
     </div>
   </div>
 
+  <!-- App entry -->
   <script type="module" src="main.js"></script>
 
+  <!-- PWA Service Worker -->
   <script>
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("sw.js").catch(()=>{});
