@@ -1,7 +1,7 @@
 import { showToast } from "./ui.js";
 import { getSettings } from "./settings.js";
 import { getDailyAyah, getRandomAyah, formatAyahForCopy } from "./quranMotivation.js";
-import { addWaterLog, addMealLog, addRestLog } from "./db.js";
+import { addWaterLog, addMealLog, addRestLog, getStreak, saveDailyAyahIfNeeded } from "./db.js";
 
 function ayahCardHTML(a){
   return `
@@ -10,13 +10,13 @@ function ayahCardHTML(a){
         <div class="label">Daily Qur’an Motivation</div>
         <div class="ayah-ref">Surah ${a.ref}</div>
       </div>
-
       <div class="ayah-ar">${a.ar}</div>
       <div class="ayah-meaning">${a.meaning}</div>
 
       <div class="ayah-actions">
         <button class="btn" id="btnAyahNew" type="button">Another verse</button>
         <button class="btn ghost" id="btnAyahCopy" type="button">Copy</button>
+        <button class="btn ghost" id="btnAyahHistory" type="button">View history</button>
       </div>
     </section>
   `;
@@ -31,85 +31,101 @@ async function copyAyah(a){
   }
 }
 
-export function renderHome(ctx){
+export async function renderHome(ctx){
   const s = getSettings();
-  const user = ctx.user;
-  const name = (user?.displayName || "Lieya").trim() || "Lieya";
+  const uid = ctx.user?.uid;
+  const name = (ctx.user?.displayName || "Lieya").trim() || "Lieya";
+  const toneLabel = ["Calm","Soft","Warm"][Number(s.toneLevel ?? 1)] || "Soft";
 
   const daily = getDailyAyah(new Date());
-  const quranSection = s.dailyQuranCard ? ayahCardHTML(daily) : "";
+  if(uid) await saveDailyAyahIfNeeded(uid, daily); // autosave daily verse
 
-  const toneLabel = ["Calm","Soft","Warm"][Number(s.toneLevel ?? 1)] || "Soft";
+  const streak = uid ? await getStreak(uid) : { count:0 };
+  const quranSection = s.dailyQuranCard ? ayahCardHTML(daily) : "";
 
   ctx.screen.innerHTML = `
     <section class="card" style="padding:16px">
-      <div class="row between">
+      <div class="row between" style="align-items:flex-start">
         <div>
-          <div class="tiny muted">${toneLabel}</div>
-          <div style="font-weight:800;font-size:28px;letter-spacing:-.4px">Today</div>
-          <div class="tiny muted">Water • Meals • Rest</div>
+          <div class="tiny muted">${toneLabel} • Malaysia launch</div>
+          <div style="font-weight:900;font-size:30px;letter-spacing:-.6px;margin-top:2px">
+            Good day, ${name}.
+          </div>
+          <div class="tiny muted" style="margin-top:8px">
+            Small care, repeated daily — that’s what becomes beautiful.
+          </div>
         </div>
-        <div class="tiny muted">For ${name}</div>
+
+        <div class="panel" style="min-width:140px; text-align:center">
+          <div class="tiny muted">Streak</div>
+          <div style="font-weight:900;font-size:26px;margin-top:2px">${streak.count || 0}</div>
+          <div class="tiny muted">days cared</div>
+        </div>
       </div>
 
-      <div style="margin-top:10px; font-size:14px; color:var(--muted)">
+      <div style="margin-top:14px; display:grid; grid-template-columns:repeat(3,1fr); gap:10px">
+        <button class="btn primary" id="btnLogWater" type="button">Water ✨</button>
+        <button class="btn primary" id="btnLogMeal" type="button">Meal 🤍</button>
+        <button class="btn primary" id="btnLogRest" type="button">Rest 🌙</button>
+      </div>
+
+      <div class="tiny muted" style="margin-top:12px">
         Private by design. Gentle by default.
-      </div>
-
-      <div class="row" style="margin-top:12px; flex-wrap:wrap">
-        <button class="btn" id="btnLogWater" type="button">Log water</button>
-        <button class="btn" id="btnLogMeal" type="button">Log meal</button>
-        <button class="btn" id="btnLogRest" type="button">Log rest</button>
       </div>
     </section>
 
     ${quranSection}
 
     <section class="card" style="padding:16px; margin-top:14px">
-      <div style="font-weight:700">A gentle note</div>
+      <div style="font-weight:750">Soft focus</div>
       <div class="tiny muted" style="margin-top:6px">
-        One step at a time, ${name}. You’re doing enough.
+        Today’s goal is simple: keep your heart calm and your body cared for.
+      </div>
+      <div class="row" style="margin-top:12px; flex-wrap:wrap">
+        <a class="btn" href="#/care">Open Care</a>
+        <a class="btn ghost" href="#/notes">Open Notes</a>
       </div>
     </section>
   `;
 
-  // quick logs
+  // logs
   document.getElementById("btnLogWater")?.addEventListener("click", async () => {
-    if(!ctx.user?.uid) return;
-    await addWaterLog(ctx.user.uid, { amount: "a few sips" });
+    if(!uid) return;
+    await addWaterLog(uid, { amount: "a few sips" });
     showToast("Logged water ✨");
+    location.hash = "#/home";
   });
 
   document.getElementById("btnLogMeal")?.addEventListener("click", async () => {
-    if(!ctx.user?.uid) return;
-    await addMealLog(ctx.user.uid, { text: "Simple meal", note: "" });
+    if(!uid) return;
+    await addMealLog(uid, { text: "Simple meal", note: "" });
     showToast("Logged meal 🤍");
+    location.hash = "#/home";
   });
 
   document.getElementById("btnLogRest")?.addEventListener("click", async () => {
-    if(!ctx.user?.uid) return;
-    await addRestLog(ctx.user.uid, { note: "Short rest" });
+    if(!uid) return;
+    await addRestLog(uid, { note: "Short rest" });
     showToast("Logged rest 🌙");
+    location.hash = "#/home";
   });
 
   // Quran buttons
   if(s.dailyQuranCard){
     let current = daily;
 
-    const btnNew = document.getElementById("btnAyahNew");
-    const btnCopy = document.getElementById("btnAyahCopy");
-
     function paint(a){
       current = a;
-      const ref = document.querySelector(".ayah-ref");
-      const ar = document.querySelector(".ayah-ar");
-      const meaning = document.querySelector(".ayah-meaning");
+      const ref = ctx.screen.querySelector(".ayah-ref");
+      const ar = ctx.screen.querySelector(".ayah-ar");
+      const meaning = ctx.screen.querySelector(".ayah-meaning");
       if(ref) ref.textContent = `Surah ${a.ref}`;
       if(ar) ar.textContent = a.ar;
       if(meaning) meaning.textContent = a.meaning;
     }
 
-    btnNew?.addEventListener("click", () => paint(getRandomAyah()));
-    btnCopy?.addEventListener("click", () => copyAyah(current));
+    document.getElementById("btnAyahNew")?.addEventListener("click", () => paint(getRandomAyah()));
+    document.getElementById("btnAyahCopy")?.addEventListener("click", () => copyAyah(current));
+    document.getElementById("btnAyahHistory")?.addEventListener("click", () => (location.hash = "#/quran"));
   }
 }
