@@ -31,6 +31,33 @@ async function copyAyah(a){
   }
 }
 
+function navHTML(){
+  return `
+    <nav class="bottom-nav" aria-label="Primary">
+      <a class="nav-item" href="#/home" data-nav="home">
+        <span class="nav-ico">⌂</span>
+        <span class="nav-txt">Home</span>
+      </a>
+      <a class="nav-item" href="#/care" data-nav="care">
+        <span class="nav-ico">♡</span>
+        <span class="nav-txt">Care</span>
+      </a>
+      <a class="nav-item" href="#/notes" data-nav="notes">
+        <span class="nav-ico">✎</span>
+        <span class="nav-txt">Notes</span>
+      </a>
+      <a class="nav-item" href="#/quran" data-nav="quran">
+        <span class="nav-ico">۞</span>
+        <span class="nav-txt">Qur’an</span>
+      </a>
+      <a class="nav-item" href="#/safety" data-nav="safety">
+        <span class="nav-ico">⛨</span>
+        <span class="nav-txt">Safety</span>
+      </a>
+    </nav>
+  `;
+}
+
 export async function renderHome(ctx){
   const s = getSettings();
   const uid = ctx.user?.uid;
@@ -86,6 +113,8 @@ export async function renderHome(ctx){
         <a class="btn ghost" href="#/notes">Open Notes</a>
       </div>
     </section>
+
+    ${navHTML()}
   `;
 
   // logs
