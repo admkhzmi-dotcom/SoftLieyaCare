@@ -1,80 +1,60 @@
 import { showToast } from "./ui.js";
+import { addNote, listNotes } from "./db.js";
 
-function esc(s){
-  return String(s||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
-}
-
-function fmt(ts){
-  if(!ts) return "";
-  const d = ts.toDate ? ts.toDate() : new Date();
-  return d.toLocaleString();
-}
-
-export function renderNotes(){
-  return `
-    <div class="card section">
-      <div class="section-title">
-        <h2>Notes</h2>
-        <span class="badge">Private</span>
-      </div>
-
-      <form id="noteForm" class="item">
-        <div><b>Write</b></div>
-        <div class="meta">Only you can see this.</div>
-
-        <label class="field">
-          <span>Mood</span>
-          <select name="mood">
-            <option value="calm">Calm</option>
-            <option value="happy">Happy</option>
-            <option value="tired">Tired</option>
-            <option value="sad">Sad</option>
-            <option value="anxious">Anxious</option>
-            <option value="mixed">Mixed</option>
-          </select>
-        </label>
-
-        <label class="field">
-          <span>Note</span>
-          <textarea name="text" placeholder="Write gently…"></textarea>
-        </label>
-
-        <button class="btn primary" type="submit">Save note</button>
-      </form>
-
-      <div class="item">
-        <div><b>Recent</b></div>
-        <div class="meta">Latest entries</div>
-        <div id="notesList" class="list"></div>
-      </div>
-    </div>
-  `;
-}
-
-export async function bindNotes(ctx, root){
-  const list = root.querySelector("#notesList");
-  const recent = await ctx.actions.getRecent("notes", 6);
-
-  if(recent.length === 0){
-    list.innerHTML = `<div class="tiny muted">No notes yet.</div>`;
-  } else {
-    list.innerHTML = recent.map(n => `
-      <div class="item">
-        <div><b>${esc((n.moodTag||"").toUpperCase())}</b></div>
-        <div>${esc(n.text||"")}</div>
-        <div class="meta">${fmt(n.timestamp)}</div>
-      </div>
-    `).join("");
+export async function renderNotes(ctx){
+  const uid = ctx.user?.uid;
+  if(!uid){
+    ctx.screen.innerHTML = `<section class="card" style="padding:16px">Please sign in.</section>`;
+    return;
   }
 
-  root.querySelector("#noteForm")?.addEventListener("submit", async (e)=>{
-    e.preventDefault();
-    const fd=new FormData(e.target);
-    const text=String(fd.get("text")||"").trim();
-    if(!text){ showToast("Write a little first."); return; }
-    await ctx.actions.addNote(fd.get("mood"), text);
-    showToast("Saved.");
-    e.target.reset();
-    ctx.actions.renderRoute("notes");
+  const notes = await listNotes(uid, 30);
+
+  ctx.screen.innerHTML = `
+    <section class="card" style="padding:16px">
+      <div style="font-weight:800;font-size:26px;letter-spacing:-.3px">Notes</div>
+      <div class="tiny muted" style="margin-top:6px">Private notes for Lieya — saved to your account.</div>
+
+      <hr class="hr">
+
+      <div class="panel">
+        <label class="field">
+          <span>Title</span>
+          <input id="noteTitle" placeholder="A soft thought…" />
+        </label>
+        <label class="field">
+          <span>Body</span>
+          <input id="noteBody" placeholder="Write something gentle…" />
+        </label>
+        <button class="btn primary" id="btnNoteSave" type="button">Save note</button>
+      </div>
+
+      <div style="margin-top:14px; display:flex; flex-direction:column; gap:10px">
+        ${notes.map(n => `
+          <div class="panel">
+            <div style="font-weight:650">${escapeHtml(n.title || "Note")}</div>
+            <div class="tiny muted" style="margin-top:6px">${escapeHtml(n.body || "")}</div>
+          </div>
+        `).join("") || `<div class="tiny muted">No notes yet.</div>`}
+      </div>
+    </section>
+  `;
+
+  document.getElementById("btnNoteSave")?.addEventListener("click", async () => {
+    const title = (document.getElementById("noteTitle")?.value || "").trim() || "Note";
+    const body  = (document.getElementById("noteBody")?.value || "").trim();
+
+    await addNote(uid, { title, body });
+    showToast("Note saved ✨");
+    location.hash = "#/notes"; // refresh
   });
+}
+
+function escapeHtml(s){
+  return String(s)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
 }
