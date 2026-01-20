@@ -1,5 +1,4 @@
-// main.js
-import { $, hidePopup, showToast, initModalSystem, openModal, closeModal } from "./ui.js";
+import { $, initModalSystem, showSettingsModal, hideSettingsModal, hidePopup, showToast } from "./ui.js";
 import { startRouter } from "./router.js";
 import { renderSettingsModal, bindSettingsModal, getSettings } from "./settings.js";
 import { onAuth, signIn, signUp, signOut, setAuthError } from "./auth.js";
@@ -9,10 +8,14 @@ import { startScheduler, stopScheduler } from "./scheduler.js";
 let stopRouter = null;
 let currentUser = null;
 
+// ✅ init modal system early (mobile reliability)
+initModalSystem();
+
 function setSignedOutUI(){
   $("#authView").hidden = false;
   $("#appView").hidden = true;
   $("#btnSignOut").hidden = true;
+  $("#btnBack").hidden = true;
   if(stopRouter) stopRouter();
   stopRouter = null;
   stopScheduler();
@@ -27,17 +30,12 @@ function setSignedInUI(){
 function ctx(){
   return {
     get user(){ return currentUser; },
-    get screen(){ return $("#screen") || $("#routeOutlet"); } // supports either id
+    get screen(){ return $("#screen"); }
   };
 }
 
 function openSettings(){
-  // ✅ Use the global modal system (iPhone-safe)
-  openModal({
-    title: "Settings",
-    html: renderSettingsModal()
-  });
-
+  showSettingsModal(renderSettingsModal());
   bindSettingsModal(() => {
     // re-render current route
     window.dispatchEvent(new HashChangeEvent("hashchange"));
@@ -45,23 +43,20 @@ function openSettings(){
 }
 
 function bindUI(){
-  // Init modal system once on boot (important)
-  initModalSystem();
-
-  // Safety: close modal if iOS cached weird state
-  document.body.classList.remove("modal-open");
-  $("#modalOverlay")?.classList.remove("show");
-
-  // Popup actions (keep your existing popup system)
+  // Popup buttons (scheduler popup)
   $("#popupClose")?.addEventListener("click", hidePopup);
   $("#popupOk")?.addEventListener("click", hidePopup);
   $("#popupSnooze")?.addEventListener("click", hidePopup);
 
-  // Settings open
+  // Settings
   $("#btnOpenSettings")?.addEventListener("click", openSettings);
+  $("#modalClose")?.addEventListener("click", hideSettingsModal);
 
-  // ❌ Remove old settings close binding (modal has its own close button)
-  // $("#btnCloseSettings")?.addEventListener("click", hideSettingsModal);
+  // Back
+  $("#btnBack")?.addEventListener("click", () => {
+    if (history.length > 1) history.back();
+    else location.hash = "#/home";
+  });
 
   // Sign out
   $("#btnSignOut")?.addEventListener("click", async () => {
@@ -105,8 +100,6 @@ const waitFirebase = setInterval(() => {
 
     if(!user){
       setSignedOutUI();
-      // optional: close settings modal if user signed out while it was open
-      closeModal?.();
       return;
     }
 
@@ -120,7 +113,7 @@ const waitFirebase = setInterval(() => {
     // Start daily 9am reminder while app open
     startScheduler(() => ({ uid: currentUser?.uid || "local" }));
 
-    // nice first-time toast
+    // Nice first-time toast
     const s = getSettings();
     if(s.toneLevel === 2) showToast("Warm mode on ✨");
   });
