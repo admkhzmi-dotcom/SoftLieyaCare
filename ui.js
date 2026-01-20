@@ -1,44 +1,66 @@
-export function $(sel, root=document){ return root.querySelector(sel); }
-export function $all(sel, root=document){ return [...root.querySelectorAll(sel)]; }
-
+// ui.js
+let modalInitialized = false;
 let toastTimer = null;
-export function showToast(msg, ms=2200){
-  const el = $("#toast");
-  if(!el) return;
-  el.textContent = msg;
-  el.hidden = false;
+
+export function showToast(text){
+  const el = document.getElementById("toast");
+  if (!el) return;
+  el.textContent = text;
+  el.classList.add("show");
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>{ el.hidden = true; }, ms);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 1400);
 }
 
-export function setActiveNav(route){
-  $all(".nav-item").forEach(a => a.classList.toggle("active", a.dataset.route === route));
+export function initModalSystem(){
+  if (modalInitialized) return;
+  modalInitialized = true;
+
+  const overlay = document.getElementById("modalOverlay");
+  const closeBtn = document.getElementById("modalClose");
+
+  function close(){
+    overlay.classList.remove("show");
+    overlay.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("modal-open");
+  }
+
+  // Close button
+  closeBtn?.addEventListener("click", close);
+
+  // Tap outside closes (important on iPhone)
+  overlay?.addEventListener("click", (e) => {
+    if (e.target === overlay) close();
+  });
+
+  // iOS sometimes prefers touchstart for overlays
+  overlay?.addEventListener("touchstart", (e) => {
+    if (e.target === overlay) close();
+  }, { passive: true });
+
+  // Escape key (desktop)
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") close();
+  });
+
+  // expose for other modules
+  window.__slcCloseModal = close;
 }
 
-export function showError(msg){
-  const el = $("#authError");
-  if(!el) return;
-  el.textContent = msg;
-  el.hidden = false;
-}
-export function clearError(){
-  const el = $("#authError");
-  if(!el) return;
-  el.textContent = "";
-  el.hidden = true;
+export function openModal({ title = "Modal", html = "" }){
+  const overlay = document.getElementById("modalOverlay");
+  const titleEl = document.getElementById("modalTitle");
+  const bodyEl  = document.getElementById("modalBody");
+
+  if (!overlay || !titleEl || !bodyEl) return;
+
+  titleEl.textContent = title;
+  bodyEl.innerHTML = html;
+
+  overlay.classList.add("show");
+  overlay.setAttribute("aria-hidden", "false");
+  document.body.classList.add("modal-open");
 }
 
-export function showPopup({title, text}){
-  $("#popupTitle").textContent = title ?? "A gentle check-in";
-  $("#popupText").textContent = text ?? "";
-  $("#popupOverlay").hidden = false;
-}
-export function hidePopup(){ $("#popupOverlay").hidden = true; }
-
-export function showSettingsModal(html){
-  $("#settingsBody").innerHTML = html;
-  $("#settingsOverlay").hidden = false;
-}
-export function hideSettingsModal(){
-  $("#settingsOverlay").hidden = true;
+export function closeModal(){
+  window.__slcCloseModal?.();
 }
