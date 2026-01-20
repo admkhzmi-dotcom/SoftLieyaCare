@@ -1,69 +1,90 @@
-function esc(s){
-  return String(s||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+import { showToast } from "./ui.js";
+
+const LS_KEY = "slc_settings_v2";
+
+export function getSettings(){
+  const raw = localStorage.getItem(LS_KEY);
+  let s = {};
+  try { s = raw ? JSON.parse(raw) : {}; } catch { s = {}; }
+
+  return {
+    dailyQuranCard: s.dailyQuranCard ?? true,
+    dailyQuran9amReminder: s.dailyQuran9amReminder ?? true,
+    toneLevel: s.toneLevel ?? 1
+  };
 }
 
-export function renderSettings(ctx){
-  const p=ctx.prefs||{};
-  const name=ctx.profile?.displayName||"Lieya";
+export function saveSettings(next){
+  localStorage.setItem(LS_KEY, JSON.stringify(next));
+}
 
+export function renderSettingsModal(){
+  const s = getSettings();
   return `
-    <form id="settingsForm">
-      <div class="item">
-        <div><b>Profile</b></div>
-        <label class="field">
-          <span>Name</span>
-          <input name="displayName" value="${esc(name)}" />
-        </label>
-      </div>
-
-      <div class="item">
-        <div><b>Tone</b></div>
-        <label class="field">
-          <span>Tone level</span>
-          <select name="toneLevel">
-            <option value="0" ${Number(p.toneLevel)===0?"selected":""}>Neutral</option>
-            <option value="1" ${Number(p.toneLevel)===1?"selected":""}>Soft</option>
-            <option value="2" ${Number(p.toneLevel)===2?"selected":""}>Warm</option>
-          </select>
-        </label>
-      </div>
-
-      <div class="item">
-        <div><b>Reminders</b></div>
-        <label class="field">
-          <span>Reminders enabled</span>
-          <select name="remindersEnabled">
-            <option value="true" ${p.remindersEnabled ? "selected":""}>On</option>
-            <option value="false" ${!p.remindersEnabled ? "selected":""}>Off</option>
-          </select>
-        </label>
-
-        <div class="grid two">
-          <label class="field">
-            <span>Quiet hours start</span>
-            <input name="quietStart" value="${p.quietHours?.start || "22:30"}" />
-          </label>
-          <label class="field">
-            <span>Quiet hours end</span>
-            <input name="quietEnd" value="${p.quietHours?.end || "08:30"}" />
-          </label>
+    <div class="stack gap">
+      <div class="row between">
+        <div>
+          <div style="font-weight:650">Daily Qur’an Motivation</div>
+          <div class="tiny muted">Arabic + meaning (paraphrase). Private, on-device.</div>
         </div>
+        <label class="switch">
+          <input id="setDailyQuranCard" type="checkbox" ${s.dailyQuranCard ? "checked":""}>
+          <span class="slider"></span>
+        </label>
+      </div>
 
-        <div class="grid two">
-          <label class="field">
-            <span>Daily popup limit</span>
-            <input name="dailyPopupLimit" type="number" min="0" max="30" value="${Number(p.dailyPopupLimit ?? 8)}" />
-          </label>
-          <label class="field">
-            <span>Cooldown (minutes)</span>
-            <input name="popupCooldownMinutes" type="number" min="0" max="240" value="${Number(p.popupCooldownMinutes ?? 45)}" />
-          </label>
+      <div class="row between">
+        <div>
+          <div style="font-weight:650">9:00 AM gentle reminder</div>
+          <div class="tiny muted">Shows once/day while the app is open.</div>
         </div>
+        <label class="switch">
+          <input id="setDailyQuran9am" type="checkbox" ${s.dailyQuran9amReminder ? "checked":""}>
+          <span class="slider"></span>
+        </label>
       </div>
 
-      <div class="row" style="justify-content:flex-end;">
-        <button class="btn primary" type="submit">Save</button>
+      <hr class="hr">
+
+      <div class="row between">
+        <div>
+          <div style="font-weight:650">Tone</div>
+          <div class="tiny muted">Calm • Soft • Warm</div>
+        </div>
+        <select id="setToneLevel">
+          <option value="0" ${String(s.toneLevel)==="0" ? "selected":""}>Calm</option>
+          <option value="1" ${String(s.toneLevel)==="1" ? "selected":""}>Soft</option>
+          <option value="2" ${String(s.toneLevel)==="2" ? "selected":""}>Warm</option>
+        </select>
       </div>
-    </form>
+
+      <div class="tiny muted">
+        Tip: If updates don’t reflect, clear site data once (Service Worker cache).
+      </div>
+    </div>
   `;
+}
+
+export function bindSettingsModal(onChange){
+  const s = getSettings();
+
+  const elCard = document.getElementById("setDailyQuranCard");
+  const el9am  = document.getElementById("setDailyQuran9am");
+  const elTone = document.getElementById("setToneLevel");
+
+  function commit(){
+    const next = {
+      ...s,
+      dailyQuranCard: !!elCard?.checked,
+      dailyQuran9amReminder: !!el9am?.checked,
+      toneLevel: Number(elTone?.value ?? s.toneLevel)
+    };
+    saveSettings(next);
+    showToast("Saved ✨");
+    onChange?.(next);
+  }
+
+  elCard?.addEventListener("change", commit);
+  el9am?.addEventListener("change", commit);
+  elTone?.addEventListener("change", commit);
 }
