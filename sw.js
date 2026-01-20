@@ -1,4 +1,5 @@
-const CACHE = "softlieya-v8"; // bump this when you deploy
+const CACHE = "softlieya-v11";
+
 const ASSETS = [
   "./",
   "./index.html",
@@ -24,64 +25,44 @@ const ASSETS = [
 ];
 
 self.addEventListener("install", (e) => {
-  e.waitUntil((async () => {
-    const cache = await caches.open(CACHE);
-
-    // Add assets one-by-one so a single 404 won't break install
-    await Promise.allSettled(
-      ASSETS.map((url) => cache.add(url))
-    );
-
-    self.skipWaiting();
-  })());
+  e.waitUntil(
+    caches.open(CACHE).then(c => c.addAll(ASSETS)).catch(()=>{})
+  );
 });
 
 self.addEventListener("activate", (e) => {
-  e.waitUntil((async () => {
-    const keys = await caches.keys();
-    await Promise.all(keys.map(k => (k !== CACHE ? caches.delete(k) : null)));
-    self.clients.claim();
-  })());
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.map(k => (k !== CACHE ? caches.delete(k) : null)))
+    )
+  );
 });
 
+// Network-first for HTML/JS to avoid "Firebase not ready" + stale module mismatches
 self.addEventListener("fetch", (e) => {
-  const req = e.request;
-  const url = new URL(req.url);
+  const url = new URL(e.request.url);
+  if (url.origin !== location.origin) return;
 
-  // Only same-origin
-  if (url.origin !== self.location.origin) return;
+  const path = url.pathname || "";
 
-  const path = url.pathname;
-  const isHTML = req.mode === "navigate" || path.endsWith(".html") || path.endsWith("/");
+  const isHTML = path.endsWith("/") || path.endsWith("/index.html") || path.endsWith(".html");
+  const isJS = path.endsWith(".js");
 
-  // HTML: Network-first (so new deploys reflect)
-  if (isHTML) {
-    e.respondWith((async () => {
-      try {
-        const fresh = await fetch(req);
-        const cache = await caches.open(CACHE);
-        cache.put(req, fresh.clone());
-        return fresh;
-      } catch {
-        const cached = await caches.match(req);
-        return cached || caches.match("./index.html");
-      }
-    })());
+  if (isHTML || isJS) {
+    e.respondWith(
+      fetch(e.request)
+        .then((res) => {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(e.request, copy));
+          return res;
+        })
+        .catch(() => caches.match(e.request))
+    );
     return;
   }
 
-  // Static assets: Stale-while-revalidate
-  e.respondWith((async () => {
-    const cached = await caches.match(req);
-    const cache = await caches.open(CACHE);
-
-    const fetchPromise = fetch(req)
-      .then((res) => {
-        if (res && res.ok) cache.put(req, res.clone());
-        return res;
-      })
-      .catch(() => null);
-
-    return cached || (await fetchPromise) || new Response("", { status: 504 });
-  })());
+  // Cache-first for CSS/icons/assets
+  e.respondWith(
+    caches.match(e.request).then((cached) => cached || fetch(e.request))
+  );
 });
