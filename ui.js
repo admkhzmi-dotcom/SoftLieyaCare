@@ -1,6 +1,7 @@
 // ui.js
 let modalInitialized = false;
 let toastTimer = null;
+let savedScrollY = 0;
 
 export function showToast(text){
   const el = document.getElementById("toast");
@@ -19,9 +20,15 @@ export function initModalSystem(){
   const closeBtn = document.getElementById("modalClose");
 
   function close(){
+    if (!overlay) return;
+
     overlay.classList.remove("show");
     overlay.setAttribute("aria-hidden", "true");
+
+    // iOS scroll restore
     document.body.classList.remove("modal-open");
+    if (savedScrollY) window.scrollTo(0, savedScrollY);
+    savedScrollY = 0;
   }
 
   // Close button
@@ -52,6 +59,9 @@ export function openModal({ title = "Modal", html = "" }){
   const bodyEl  = document.getElementById("modalBody");
 
   if (!overlay || !titleEl || !bodyEl) return;
+
+  // iOS scroll lock (prevents jump)
+  savedScrollY = window.scrollY || 0;
 
   titleEl.textContent = title;
   bodyEl.innerHTML = html;
