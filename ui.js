@@ -1,24 +1,24 @@
 export function $(sel, root=document){ return root.querySelector(sel); }
 export function $all(sel, root=document){ return [...root.querySelectorAll(sel)]; }
 
+let toastTimer = null;
+export function showToast(msg, ms=2200){
+  const el = $("#toast");
+  if(!el) return;
+  el.textContent = msg;
+  el.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>{ el.hidden = true; }, ms);
+}
+
 export function setActiveNav(route){
   $all(".nav-item").forEach(a => a.classList.toggle("active", a.dataset.route === route));
 }
 
-let toastTimer=null;
-export function showToast(message, ms=2200){
-  const el = $("#toast");
-  if(!el) return;
-  el.textContent = message;
-  el.hidden = false;
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=> el.hidden = true, ms);
-}
-
-export function showError(message){
+export function showError(msg){
   const el = $("#authError");
   if(!el) return;
-  el.textContent = message;
+  el.textContent = msg;
   el.hidden = false;
 }
 export function clearError(){
@@ -39,4 +39,6 @@ export function showSettingsModal(html){
   $("#settingsBody").innerHTML = html;
   $("#settingsOverlay").hidden = false;
 }
-export function hideSettingsModal(){ $("#settingsOverlay").hidden = true; }
+export function hideSettingsModal(){
+  $("#settingsOverlay").hidden = true;
+}
