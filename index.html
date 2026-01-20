@@ -6,11 +6,9 @@
   <meta name="theme-color" content="#F6F1E8" />
   <title>SoftLieya Care</title>
 
-  <!-- PWA -->
   <link rel="manifest" href="./app.webmanifest">
   <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
-  <link rel="icon" href="./apple-touch-icon.png">
-
+  <link rel="icon" type="image/png" href="./apple-touch-icon.png">
   <link rel="stylesheet" href="./styles.css" />
 </head>
 
@@ -25,6 +23,7 @@
     </div>
 
     <div class="topbar-actions">
+      <button id="btnBack" class="btn ghost" type="button" hidden>Back</button>
       <button id="btnOpenSettings" class="btn ghost" type="button">Settings</button>
       <button id="btnSignOut" class="btn ghost" type="button" hidden>Sign out</button>
     </div>
@@ -36,8 +35,10 @@
       <div class="card auth-card">
         <h1 class="h1">Welcome.</h1>
         <p class="muted">
-          SoftLieya Care is a private, gentle companion. No tracking. No control.
+          A private, gentle companion. No tracking. No control.
         </p>
+
+        <p id="authError" class="muted" style="margin-top:10px;color:#8a3b2f" hidden></p>
 
         <div class="auth-grid">
           <form id="signInForm" class="panel">
@@ -54,8 +55,9 @@
             </label>
 
             <button class="btn primary" type="submit">Sign in</button>
-
-            <p class="tiny muted">New here? Create an account on the right.</p>
+            <div class="tiny muted" style="margin-top:10px">
+              New here? Create an account on the right.
+            </div>
           </form>
 
           <form id="signUpForm" class="panel">
@@ -78,34 +80,59 @@
 
             <button class="btn" type="submit">Create account</button>
 
-            <p class="tiny muted">Your data is private to your account.</p>
+            <div class="tiny muted" style="margin-top:10px">
+              Your data is private to your account.
+            </div>
           </form>
         </div>
-
-        <!-- ✅ Auth error message used by auth.js -->
-        <p id="authError" class="tiny" style="color:#B42318; margin-top:12px" hidden></p>
       </div>
     </section>
 
     <!-- APP -->
     <section id="appView" class="view" hidden>
-      <div id="screen"></div>
+      <!-- Loading skeleton so it feels instant -->
+      <div id="screen" class="stack gap">
+        <section class="card" style="padding:16px">
+          <div class="tiny muted">Loading…</div>
+          <div style="font-weight:900;font-size:28px;margin-top:6px">Just a moment.</div>
+          <div class="tiny muted" style="margin-top:10px">Preparing your space.</div>
+        </section>
+      </div>
+
+      <!-- Bottom nav (router highlights via data-nav) -->
+      <nav class="card" style="margin-top:16px;padding:10px 14px">
+        <div class="row between" style="gap:8px; flex-wrap:wrap">
+          <a class="btn ghost" href="#/home" data-nav="home">Home</a>
+          <a class="btn ghost" href="#/care" data-nav="care">Care</a>
+          <a class="btn ghost" href="#/notes" data-nav="notes">Notes</a>
+          <a class="btn ghost" href="#/quran" data-nav="quran">Qur’an</a>
+          <a class="btn ghost" href="#/safety" data-nav="safety">Safety</a>
+        </div>
+      </nav>
     </section>
   </main>
 
-  <!-- Toast -->
-  <div id="toast" class="toast" aria-live="polite" aria-atomic="true"></div>
+  <!-- SETTINGS MODAL -->
+  <div id="modalOverlay" class="modal-overlay" aria-hidden="true">
+    <div class="modal-sheet" role="dialog" aria-modal="true">
+      <div class="modal-header">
+        <div id="modalTitle" class="modal-title">Settings</div>
+        <button id="modalClose" class="btn ghost" type="button">Close</button>
+      </div>
+      <div id="modalBody" class="modal-body"></div>
+    </div>
+  </div>
 
-  <!-- OPTIONAL Popup (if scheduler/popup uses these IDs) -->
-  <div id="popupOverlay" class="modal-overlay" aria-hidden="true" style="z-index:9998">
+  <!-- POPUP (for scheduler reminders) -->
+  <div id="popupOverlay" class="modal-overlay" aria-hidden="true">
     <div class="modal-sheet" role="dialog" aria-modal="true">
       <div class="modal-header">
         <div class="modal-title">Reminder</div>
         <button id="popupClose" class="btn ghost" type="button">Close</button>
       </div>
       <div class="modal-body">
-        <div id="popupBody" class="muted"></div>
-        <div class="row" style="margin-top:12px; justify-content:flex-end; gap:10px; flex-wrap:wrap">
+        <div id="popupBody" class="stack gap"></div>
+        <div class="row" style="margin-top:12px; justify-content:flex-end; gap:10px">
           <button id="popupSnooze" class="btn ghost" type="button">Snooze</button>
           <button id="popupOk" class="btn primary" type="button">Okay</button>
         </div>
@@ -113,16 +140,8 @@
     </div>
   </div>
 
-  <!-- ✅ Global Modal (Settings uses this) -->
-  <div id="modalOverlay" class="modal-overlay" aria-hidden="true">
-    <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-      <div class="modal-header">
-        <div class="modal-title" id="modalTitle">Modal</div>
-        <button id="modalClose" class="btn ghost" type="button">Close</button>
-      </div>
-      <div id="modalBody" class="modal-body"></div>
-    </div>
-  </div>
+  <!-- TOAST -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <!-- Scripts -->
   <script type="module" src="./config.js"></script>
