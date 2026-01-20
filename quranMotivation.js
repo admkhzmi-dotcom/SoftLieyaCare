@@ -1,4 +1,3 @@
-// Arabic excerpt + reference + English meaning (paraphrase).
 const AYAT = [
   { ref:"94:5–6", ar:"فَإِنَّ مَعَ الْعُسْرِ يُسْرًا • إِنَّ مَعَ الْعُسْرِ يُسْرًا",
     meaning:"With hardship comes ease — and ease will come again. Keep going gently." },
@@ -18,7 +17,7 @@ const AYAT = [
     meaning:"Allah hears and sees. You are not unseen — you are held in care." }
 ];
 
-function todayKey(d=new Date()){
+function dateKey(d=new Date()){
   const y=d.getFullYear();
   const m=String(d.getMonth()+1).padStart(2,"0");
   const da=String(d.getDate()).padStart(2,"0");
@@ -38,17 +37,19 @@ function seededIndex(seed, len){
 }
 
 export function getDailyAyah(date=new Date()){
-  const key=todayKey(date);
+  const key=dateKey(date);
   const seed=seedFromKey(key);
   return AYAT[seededIndex(seed, AYAT.length)];
 }
+
 export function getRandomAyah(){
   return AYAT[Math.floor(Math.random()*AYAT.length)];
 }
+
 export function formatAyahForCopy(a){
   return `Surah ${a.ref}\n${a.ar}\n\nMeaning (paraphrase): ${a.meaning}`;
 }
-export function getTodayKey(date=new Date()){
-  return todayKey(date);
-}
 
+export function getTodayKey(date=new Date()){
+  return dateKey(date);
+}
