@@ -1,4 +1,4 @@
-const CACHE = "softlieya-v11";
+const CACHE = "softlieya-v12";
 
 const ASSETS = [
   "./",
@@ -6,7 +6,6 @@ const ASSETS = [
   "./styles.css",
   "./app.webmanifest",
   "./apple-touch-icon.png",
-
   "./config.js",
   "./main.js",
   "./router.js",
@@ -25,9 +24,7 @@ const ASSETS = [
 ];
 
 self.addEventListener("install", (e) => {
-  e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(ASSETS)).catch(()=>{})
-  );
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).catch(()=>{}));
 });
 
 self.addEventListener("activate", (e) => {
@@ -38,22 +35,17 @@ self.addEventListener("activate", (e) => {
   );
 });
 
-// Network-first for HTML/JS to avoid "Firebase not ready" + stale module mismatches
+// ✅ Network-first for JS/HTML to prevent “old file mismatch” bugs
 self.addEventListener("fetch", (e) => {
   const url = new URL(e.request.url);
   if (url.origin !== location.origin) return;
 
-  const path = url.pathname || "";
-
-  const isHTML = path.endsWith("/") || path.endsWith("/index.html") || path.endsWith(".html");
-  const isJS = path.endsWith(".js");
-
-  if (isHTML || isJS) {
+  if (url.pathname.endsWith(".js") || url.pathname.endsWith(".html")) {
     e.respondWith(
       fetch(e.request)
-        .then((res) => {
+        .then(res => {
           const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(e.request, copy));
+          caches.open(CACHE).then(c => c.put(e.request, copy));
           return res;
         })
         .catch(() => caches.match(e.request))
@@ -61,8 +53,7 @@ self.addEventListener("fetch", (e) => {
     return;
   }
 
-  // Cache-first for CSS/icons/assets
   e.respondWith(
-    caches.match(e.request).then((cached) => cached || fetch(e.request))
+    caches.match(e.request).then(cached => cached || fetch(e.request))
   );
 });
