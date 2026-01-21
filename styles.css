@@ -334,45 +334,73 @@ body.modal-open{
 }
 
 /* ===========================
-   Qur’an card spacing fix
+   Qur’an / Ayah typography + spacing
 =========================== */
-.ayah-card{ padding:0; }
-.ayah-inner{ padding:16px; }
 
+/* Card padding consistency */
+.ayah-card{ padding: 0; }
+.ayah-inner{ padding: 18px 18px 16px; }
+
+/* Title row */
 .ayah-title{
   display:flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom: 10px;
 }
 .label{
-  font-weight: 850;
-  letter-spacing: .1px;
+  font-weight: 900;
+  letter-spacing: .2px;
+  font-size: 18px;
 }
 .ayah-ref{
   font-size: 12px;
   color: var(--muted);
   white-space: nowrap;
 }
+
+/* Arabic verse styling (ALL ayah Arabic) */
 .ayah-ar{
-  margin-top: 10px;
-  font-size: 20px;
-  line-height: 1.9;
+  margin-top: 6px;          /* ✅ tighter */
+  margin-bottom: 8px;       /* ✅ consistent */
+  font-family: var(--ayah-font);
+  font-size: 26px;          /* ✅ more Qur’an-like */
+  line-height: 2.05;
   direction: rtl;
-  text-align: left;
+  text-align: right;        /* ✅ looks natural */
+  letter-spacing: 0;
 }
+
+/* English meaning */
 .ayah-meaning{
-  margin-top: 8px;
+  margin-top: 0;
+  margin-bottom: 12px;
   color: var(--text);
-  line-height: 1.5;
+  line-height: 1.6;
+  font-size: 15px;
 }
+
+/* Buttons */
 .ayah-actions{
-  margin-top: 12px;
+  margin-top: 6px;          /* ✅ remove big gap */
   display:flex;
   gap: 10px;
   flex-wrap: wrap;
 }
-.ayah-actions .btn{ min-width: 140px; }
+.ayah-actions .btn{
+  min-width: 140px;
+}
+
+/* Qur’an history page Arabic blocks too */
+.quran-ar{
+  font-family: var(--ayah-font);
+  font-size: 24px;
+  line-height: 2.0;
+  direction: rtl;
+  text-align: right;
+  margin: 8px 0 10px;
+}
 
 /* Skeleton */
 .skeleton{
