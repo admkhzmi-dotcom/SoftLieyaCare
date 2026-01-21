@@ -392,15 +392,15 @@ body.modal-open{
   min-width: 140px;
 }
 
-/* Qur’an history page Arabic blocks too */
 .quran-ar{
   font-family: var(--ayah-font);
-  font-size: 24px;
-  line-height: 2.0;
+  font-size: 26px;
+  line-height: 2.1;
   direction: rtl;
   text-align: right;
-  margin: 8px 0 10px;
+  margin: 10px 0 10px;
 }
+
 
 /* Skeleton */
 .skeleton{
