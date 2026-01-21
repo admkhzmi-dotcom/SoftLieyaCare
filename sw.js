@@ -1,4 +1,4 @@
-const CACHE = "softlieya-v13";
+const CACHE = "softlieya-v14";
 
 const ASSETS = [
   "./",
@@ -58,5 +58,6 @@ self.addEventListener("fetch", (e) => {
     caches.match(e.request).then(cached => cached || fetch(e.request))
   );
 });
+
 
 
