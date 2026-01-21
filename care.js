@@ -60,3 +60,4 @@ export function renderCare(ctx){
     showToast("Rest logged 🌙");
   });
 }
+
