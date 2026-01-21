@@ -1,3 +1,4 @@
+// scheduler.js
 import { showPopup } from "./ui.js";
 import { getSettings } from "./settings.js";
 import { getDailyAyah, getTodayKey } from "./quranMotivation.js";
@@ -24,15 +25,17 @@ export function startScheduler(getUser){
     const lastKey = `slc_quran_9am_last_${uid}`;
     const last = localStorage.getItem(lastKey);
 
+    // 9:00 AM = 540 minutes
     if(nowMinutes() >= 540 && last !== keyToday){
-      const a = getDailyAyah(new Date());
+      // ✅ FIX: await the async daily ayah
+      const a = await getDailyAyah(new Date());
+
+      // Save to history (optional, but nice)
       await saveDailyAyahIfNeeded(uid, a);
 
       showPopup({
         title: "A gentle morning reminder",
-        text: `Surah ${a.ref}\n\n${a.ar}\n\nMeaning (paraphrase): ${a.meaning}`,
-        okText: "Okay",
-        snoozeText: "Snooze"
+        text: `Surah ${a?.ref || ""}\n\n${a?.ar || ""}\n\nMeaning: ${a?.meaning || ""}`
       });
 
       localStorage.setItem(lastKey, keyToday);
