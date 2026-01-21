@@ -1,4 +1,3 @@
-// settings.js
 import { showToast } from "./ui.js";
 
 const LS_KEY = "slc_settings_v2";
@@ -25,8 +24,8 @@ export function renderSettingsModal(){
     <div class="stack gap">
       <div class="row between">
         <div>
-          <div style="font-weight:650">Daily Qur’an Motivation</div>
-          <div class="tiny muted">Arabic + meaning (paraphrase). Private, on-device.</div>
+          <div style="font-weight:650">Daily verse card</div>
+          <div class="tiny muted">Arabic + meaning (paraphrase). Private.</div>
         </div>
         <label class="switch">
           <input id="setDailyQuranCard" type="checkbox" ${s.dailyQuranCard ? "checked":""}>
@@ -60,7 +59,7 @@ export function renderSettingsModal(){
       </div>
 
       <div class="tiny muted">
-        Tip: If updates don’t reflect, clear site data once (Service Worker cache).
+        Tip: If updates don’t reflect, bump SW cache version in <b>sw.js</b>.
       </div>
     </div>
   `;
@@ -68,7 +67,6 @@ export function renderSettingsModal(){
 
 export function bindSettingsModal(onChange){
   const prev = getSettings();
-
   const elCard = document.getElementById("setDailyQuranCard");
   const el9am  = document.getElementById("setDailyQuran9am");
   const elTone = document.getElementById("setToneLevel");
