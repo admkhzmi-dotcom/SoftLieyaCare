@@ -20,6 +20,7 @@ const ASSETS = [
   "./care.js",
   "./notes.js",
   "./quran.js",
+  "./quranApi.js",
   "./safety.js"
 ];
 
@@ -57,4 +58,5 @@ self.addEventListener("fetch", (e) => {
     caches.match(e.request).then(cached => cached || fetch(e.request))
   );
 });
+
 
