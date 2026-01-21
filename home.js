@@ -6,17 +6,20 @@ import { addWaterLog, addMealLog, addRestLog, getStreak, saveDailyAyahIfNeeded }
 function ayahCardHTML(a){
   return `
     <section class="card ayah-card">
-      <div class="ayah-title">
-        <div class="label">Daily Qur’an Motivation</div>
-        <div class="ayah-ref">Surah ${a.ref}</div>
-      </div>
-      <div class="ayah-ar">${a.ar}</div>
-      <div class="ayah-meaning">${a.meaning}</div>
+      <div class="ayah-inner">
+        <div class="ayah-title">
+          <div class="label">Today’s verse</div>
+          <div class="ayah-ref">Surah ${a.ref}</div>
+        </div>
 
-      <div class="ayah-actions">
-        <button class="btn" id="btnAyahNew" type="button">Another verse</button>
-        <button class="btn ghost" id="btnAyahCopy" type="button">Copy</button>
-        <button class="btn ghost" id="btnAyahHistory" type="button">View history</button>
+        <div class="ayah-ar">${a.ar}</div>
+        <div class="ayah-meaning">${a.meaning}</div>
+
+        <div class="ayah-actions">
+          <button class="btn" id="btnAyahNew" type="button">Another verse</button>
+          <button class="btn ghost" id="btnAyahCopy" type="button">Copy</button>
+          <button class="btn ghost" id="btnAyahHistory" type="button">History</button>
+        </div>
       </div>
     </section>
   `;
@@ -31,33 +34,6 @@ async function copyAyah(a){
   }
 }
 
-function navHTML(){
-  return `
-    <nav class="bottom-nav" aria-label="Primary">
-      <a class="nav-item" href="#/home" data-nav="home">
-        <span class="nav-ico">⌂</span>
-        <span class="nav-txt">Home</span>
-      </a>
-      <a class="nav-item" href="#/care" data-nav="care">
-        <span class="nav-ico">♡</span>
-        <span class="nav-txt">Care</span>
-      </a>
-      <a class="nav-item" href="#/notes" data-nav="notes">
-        <span class="nav-ico">✎</span>
-        <span class="nav-txt">Notes</span>
-      </a>
-      <a class="nav-item" href="#/quran" data-nav="quran">
-        <span class="nav-ico">۞</span>
-        <span class="nav-txt">Qur’an</span>
-      </a>
-      <a class="nav-item" href="#/safety" data-nav="safety">
-        <span class="nav-ico">⛨</span>
-        <span class="nav-txt">Safety</span>
-      </a>
-    </nav>
-  `;
-}
-
 export async function renderHome(ctx){
   const s = getSettings();
   const uid = ctx.user?.uid;
@@ -65,7 +41,7 @@ export async function renderHome(ctx){
   const toneLabel = ["Calm","Soft","Warm"][Number(s.toneLevel ?? 1)] || "Soft";
 
   const daily = getDailyAyah(new Date());
-  if(uid) await saveDailyAyahIfNeeded(uid, daily); // autosave daily verse
+  if(uid) await saveDailyAyahIfNeeded(uid, daily);
 
   const streak = uid ? await getStreak(uid) : { count:0 };
   const quranSection = s.dailyQuranCard ? ayahCardHTML(daily) : "";
@@ -74,19 +50,19 @@ export async function renderHome(ctx){
     <section class="card" style="padding:16px">
       <div class="row between" style="align-items:flex-start">
         <div>
-          <div class="tiny muted">${toneLabel} • Malaysia launch</div>
+          <div class="tiny muted">${toneLabel} mode • Today</div>
           <div style="font-weight:900;font-size:30px;letter-spacing:-.6px;margin-top:2px">
             Good day, ${name}.
           </div>
           <div class="tiny muted" style="margin-top:8px">
-            Small care, repeated daily — that’s what becomes beautiful.
+            One gentle step at a time.
           </div>
         </div>
 
         <div class="panel" style="min-width:140px; text-align:center">
           <div class="tiny muted">Streak</div>
           <div style="font-weight:900;font-size:26px;margin-top:2px">${streak.count || 0}</div>
-          <div class="tiny muted">days cared</div>
+          <div class="tiny muted">days</div>
         </div>
       </div>
 
@@ -97,27 +73,24 @@ export async function renderHome(ctx){
       </div>
 
       <div class="tiny muted" style="margin-top:12px">
-        Private by design. Gentle by default.
+        Private. Gentle. Yours.
       </div>
     </section>
 
     ${quranSection}
 
     <section class="card" style="padding:16px; margin-top:14px">
-      <div style="font-weight:750">Soft focus</div>
+      <div style="font-weight:850">Soft focus</div>
       <div class="tiny muted" style="margin-top:6px">
-        Today’s goal is simple: keep your heart calm and your body cared for.
+        Keep your heart calm and your body cared for.
       </div>
       <div class="row" style="margin-top:12px; flex-wrap:wrap">
         <a class="btn" href="#/care">Open Care</a>
         <a class="btn ghost" href="#/notes">Open Notes</a>
       </div>
     </section>
-
-    ${navHTML()}
   `;
 
-  // logs
   document.getElementById("btnLogWater")?.addEventListener("click", async () => {
     if(!uid) return;
     await addWaterLog(uid, { amount: "a few sips" });
@@ -139,7 +112,6 @@ export async function renderHome(ctx){
     location.hash = "#/home";
   });
 
-  // Quran buttons
   if(s.dailyQuranCard){
     let current = daily;
 
