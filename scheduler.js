@@ -24,7 +24,6 @@ export function startScheduler(getUser){
     const lastKey = `slc_quran_9am_last_${uid}`;
     const last = localStorage.getItem(lastKey);
 
-    // 9:00 AM = 540 minutes
     if(nowMinutes() >= 540 && last !== keyToday){
       const a = getDailyAyah(new Date());
       await saveDailyAyahIfNeeded(uid, a);
