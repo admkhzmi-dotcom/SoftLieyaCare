@@ -8,14 +8,10 @@ import { startScheduler, stopScheduler } from "./scheduler.js";
 let stopRouter = null;
 let currentUser = null;
 
-// ✅ init modal system early (mobile reliability)
-initModalSystem();
-
 function setSignedOutUI(){
   $("#authView").hidden = false;
   $("#appView").hidden = true;
   $("#btnSignOut").hidden = true;
-  $("#btnBack").hidden = true;
   if(stopRouter) stopRouter();
   stopRouter = null;
   stopScheduler();
@@ -37,13 +33,20 @@ function ctx(){
 function openSettings(){
   showSettingsModal(renderSettingsModal());
   bindSettingsModal(() => {
-    // re-render current route
     window.dispatchEvent(new HashChangeEvent("hashchange"));
   });
 }
 
 function bindUI(){
-  // Popup buttons (scheduler popup)
+  initModalSystem();
+
+  // Back
+  $("#btnBack")?.addEventListener("click", () => {
+    if (history.length > 1) history.back();
+    else location.hash = "#/home";
+  });
+
+  // Popup buttons
   $("#popupClose")?.addEventListener("click", hidePopup);
   $("#popupOk")?.addEventListener("click", hidePopup);
   $("#popupSnooze")?.addEventListener("click", hidePopup);
@@ -52,18 +55,12 @@ function bindUI(){
   $("#btnOpenSettings")?.addEventListener("click", openSettings);
   $("#modalClose")?.addEventListener("click", hideSettingsModal);
 
-  // Back
-  $("#btnBack")?.addEventListener("click", () => {
-    if (history.length > 1) history.back();
-    else location.hash = "#/home";
-  });
-
   // Sign out
   $("#btnSignOut")?.addEventListener("click", async () => {
     await signOut();
   });
 
-  // Auth forms
+  // Sign in
   $("#signInForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const email = e.target.email.value.trim();
@@ -75,6 +72,7 @@ function bindUI(){
     }
   });
 
+  // Sign up
   $("#signUpForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const name = e.target.name.value.trim() || "Lieya";
@@ -90,7 +88,7 @@ function bindUI(){
 
 bindUI();
 
-// Wait for Firebase to be ready (config.js initializes globals)
+// Wait Firebase
 const waitFirebase = setInterval(() => {
   if(!window.SLC?.auth || !window.SLC?.db) return;
   clearInterval(waitFirebase);
@@ -107,13 +105,12 @@ const waitFirebase = setInterval(() => {
     await ensureUserDoc(user.uid, user);
 
     if(!location.hash) location.hash = "#/home";
-
     if(!stopRouter) stopRouter = startRouter(ctx());
 
-    // Start daily 9am reminder while app open
-    startScheduler(() => ({ uid: currentUser?.uid || "local" }));
+    // daily reminder while app open
+    startScheduler(() => currentUser);
 
-    // Nice first-time toast
+    // tiny delight
     const s = getSettings();
     if(s.toneLevel === 2) showToast("Warm mode on ✨");
   });
