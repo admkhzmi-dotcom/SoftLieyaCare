@@ -1,3 +1,4 @@
+// home.js
 import { showToast } from "./ui.js";
 import { getSettings } from "./settings.js";
 import { getDailyAyah, getRandomAyah, formatAyahForCopy } from "./quranMotivation.js";
@@ -25,6 +26,29 @@ function ayahCardHTML(a){
   `;
 }
 
+function ayahSkeletonHTML(){
+  return `
+    <section class="card ayah-card">
+      <div class="ayah-inner">
+        <div class="ayah-title">
+          <div class="label">Today’s verse</div>
+          <div class="ayah-ref">Loading…</div>
+        </div>
+
+        <div class="skeleton" style="height:46px; margin-top:8px"></div>
+        <div class="skeleton" style="height:18px; margin-top:10px; width:86%"></div>
+        <div class="skeleton" style="height:18px; margin-top:8px; width:72%"></div>
+
+        <div class="ayah-actions" style="margin-top:14px">
+          <button class="btn" disabled type="button">Another verse</button>
+          <button class="btn ghost" disabled type="button">Copy</button>
+          <button class="btn ghost" disabled type="button">History</button>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
 async function copyAyah(a){
   try{
     await navigator.clipboard.writeText(formatAyahForCopy(a));
@@ -40,12 +64,9 @@ export async function renderHome(ctx){
   const name = (ctx.user?.displayName || "Lieya").trim() || "Lieya";
   const toneLabel = ["Calm","Soft","Warm"][Number(s.toneLevel ?? 1)] || "Soft";
 
-  const daily = getDailyAyah(new Date());
-  if(uid) await saveDailyAyahIfNeeded(uid, daily);
-
   const streak = uid ? await getStreak(uid) : { count:0 };
-  const quranSection = s.dailyQuranCard ? ayahCardHTML(daily) : "";
 
+  // Render base UI first (fast), then hydrate the verse (prevents "stuck" feeling)
   ctx.screen.innerHTML = `
     <section class="card" style="padding:16px">
       <div class="row between" style="align-items:flex-start">
@@ -77,7 +98,7 @@ export async function renderHome(ctx){
       </div>
     </section>
 
-    ${quranSection}
+    ${s.dailyQuranCard ? ayahSkeletonHTML() : ""}
 
     <section class="card" style="padding:16px; margin-top:14px">
       <div style="font-weight:850">Soft focus</div>
@@ -91,6 +112,7 @@ export async function renderHome(ctx){
     </section>
   `;
 
+  // Bind log buttons
   document.getElementById("btnLogWater")?.addEventListener("click", async () => {
     if(!uid) return;
     await addWaterLog(uid, { amount: "a few sips" });
@@ -112,7 +134,24 @@ export async function renderHome(ctx){
     location.hash = "#/home";
   });
 
+  // Hydrate Quran section (async)
   if(s.dailyQuranCard){
+    let daily = null;
+
+    try{
+      daily = await getDailyAyah(new Date()); // ✅ now awaited
+      if(uid) await saveDailyAyahIfNeeded(uid, daily);
+
+      // Replace skeleton with real card
+      const card = ctx.screen.querySelector(".ayah-card");
+      if(card) card.outerHTML = ayahCardHTML(daily);
+    }catch{
+      // fallback to local random if totally broken
+      daily = getRandomAyah();
+      const card = ctx.screen.querySelector(".ayah-card");
+      if(card) card.outerHTML = ayahCardHTML(daily);
+    }
+
     let current = daily;
 
     function paint(a){
@@ -125,7 +164,17 @@ export async function renderHome(ctx){
       if(meaning) meaning.textContent = a.meaning;
     }
 
-    document.getElementById("btnAyahNew")?.addEventListener("click", () => paint(getRandomAyah()));
+    // Another verse: prefer API refresh; fallback to local list
+    document.getElementById("btnAyahNew")?.addEventListener("click", async () => {
+      try{
+        const a = await getDailyAyah(new Date());
+        paint(a);
+        if(uid) await saveDailyAyahIfNeeded(uid, a);
+      }catch{
+        paint(getRandomAyah());
+      }
+    });
+
     document.getElementById("btnAyahCopy")?.addEventListener("click", () => copyAyah(current));
     document.getElementById("btnAyahHistory")?.addEventListener("click", () => (location.hash = "#/quran"));
   }
