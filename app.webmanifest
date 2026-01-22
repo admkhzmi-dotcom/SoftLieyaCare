@@ -1,0 +1,12 @@
+{
+  "name": "SoftLieya Care",
+  "short_name": "SoftLieya",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F6F1E8",
+  "theme_color": "#B8945A",
+  "icons": [
+    { "src": "./apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}

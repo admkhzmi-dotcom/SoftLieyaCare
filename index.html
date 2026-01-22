@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#B8945A" />
+  <title>SoftLieya Care</title>
+
+  <!-- GitHub Pages (repo path) safe -->
+  <link rel="manifest" href="./app.webmanifest">
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="./apple-touch-icon.png">
+  <link rel="stylesheet" href="./styles.css" />
+
+  <!-- Arabic font (optional) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">S</div>
+      <div class="brand-text">
+        <div class="brand-title">SoftLieya Care</div>
+        <div class="brand-sub">Private • Gentle • Premium</div>
+      </div>
+    </div>
+
+    <div class="topbar-actions">
+      <button id="btnBack" class="btn ghost" type="button" hidden>Back</button>
+      <button id="btnOpenSettings" class="btn ghost" type="button">Settings</button>
+      <button id="btnSignOut" class="btn ghost" type="button" hidden>Sign out</button>
+    </div>
+  </header>
+
+  <main class="app">
+    <!-- AUTH -->
+    <section id="authView" class="view auth">
+      <div class="card auth-card">
+        <h1 class="h1">Welcome.</h1>
+        <p class="muted">
+          SoftLieya Care is a private, gentle companion. No tracking. No control.
+        </p>
+
+        <div id="authError" class="error" hidden></div>
+
+        <!-- Swipe toggle -->
+        <div class="auth-toggle" role="tablist" aria-label="Authentication">
+          <button id="authTabIn" class="auth-tab active" type="button" role="tab" aria-selected="true">Sign in</button>
+          <button id="authTabUp" class="auth-tab" type="button" role="tab" aria-selected="false">Sign up</button>
+        </div>
+
+        <div class="auth-swipe" id="authSwipe" aria-live="polite">
+          <div class="auth-track" id="authTrack">
+            <div class="auth-page">
+              <form id="signInForm" class="panel">
+                <h2 class="h2">Sign in</h2>
+                <label class="field">
+                  <span>Email</span>
+                  <input name="email" type="email" placeholder="you@example.com" required />
+                </label>
+                <label class="field">
+                  <span>Password</span>
+                  <input name="password" type="password" placeholder="••••••••" required />
+                </label>
+                <button class="btn primary" type="submit">Sign in</button>
+
+                <div class="guide" style="margin-top:12px">
+                  <div class="tiny muted">
+                    Tip: swipe left to create an account. Your data is private to your login.
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <div class="auth-page">
+              <form id="signUpForm" class="panel">
+                <h2 class="h2">Create account</h2>
+                <label class="field">
+                  <span>Name</span>
+                  <input name="name" type="text" placeholder="Lieya" />
+                </label>
+                <label class="field">
+                  <span>Email</span>
+                  <input name="email" type="email" placeholder="you@example.com" required />
+                </label>
+                <label class="field">
+                  <span>Password</span>
+                  <input name="password" type="password" placeholder="••••••••" required />
+                </label>
+                <button class="btn" type="submit">Create account</button>
+
+                <div class="guide" style="margin-top:12px">
+                  <div class="tiny muted">
+                    Tip: after you sign up, go to Home → log Water/Meal/Rest, and check Period tracker if needed.
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- APP -->
+    <section id="appView" class="view" hidden>
+      <div id="screen"></div>
+
+      <!-- Single bottom navigation -->
+      <nav class="card bottom-nav" aria-label="Primary">
+        <a class="nav-item" href="#/home" data-nav="home" aria-label="Home">
+          <div class="nav-ico">⌂</div><div class="nav-label">Home</div>
+        </a>
+        <a class="nav-item" href="#/care" data-nav="care" aria-label="Period">
+          <div class="nav-ico">♡</div><div class="nav-label">Period</div>
+        </a>
+        <a class="nav-item" href="#/notes" data-nav="notes" aria-label="Notes">
+          <div class="nav-ico">✎</div><div class="nav-label">Notes</div>
+        </a>
+        <a class="nav-item" href="#/quran" data-nav="quran" aria-label="Qur’an">
+          <div class="nav-ico">۞</div><div class="nav-label">Qur’an</div>
+        </a>
+        <a class="nav-item" href="#/safety" data-nav="safety" aria-label="Safety">
+          <div class="nav-ico">✚</div><div class="nav-label">Safety</div>
+        </a>
+      </nav>
+    </section>
+  </main>
+
+  <!-- Settings Modal -->
+  <div id="modalOverlay" class="modal-overlay" aria-hidden="true">
+    <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-header">
+        <div id="modalTitle" class="modal-title">Settings</div>
+        <button id="modalClose" class="btn ghost" type="button">Close</button>
+      </div>
+      <div id="modalBody" class="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Popup (reminders + questions) -->
+  <div id="popupOverlay" class="modal-overlay" aria-hidden="true">
+    <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="popupTitle">
+      <div class="modal-header">
+        <div id="popupTitle" class="modal-title">Notice</div>
+        <button id="popupClose" class="btn ghost" type="button">Close</button>
+      </div>
+      <div class="modal-body">
+        <pre id="popupText" class="popup-pre"></pre>
+
+        <!-- 3-button row -->
+        <div class="row between" style="margin-top:14px">
+          <button id="popupSnooze" class="btn ghost" type="button">Snooze</button>
+          <button id="popupThird" class="btn ghost" type="button" hidden>Option</button>
+          <button id="popupOk" class="btn primary" type="button">Okay</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- Loading overlay -->
+  <div id="appLoader" class="loader-overlay show" aria-busy="true" aria-live="polite">
+    <div class="loader-card">
+      <div class="loader-icon" aria-hidden="true">S</div>
+      <div class="loader-spinner" aria-hidden="true"></div>
+      <div class="loader-text">Starting…</div>
+    </div>
+  </div>
+
+  <!-- App scripts -->
+  <script type="module" src="./config.js"></script>
+  <script type="module" src="./main.js"></script>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js").catch(()=>{});
+      });
+    }
+  </script>
+</body>
+</html>
