@@ -126,6 +126,7 @@ button{ font-family: inherit; }
   box-shadow: 0 0 0 4px rgba(184,148,90,0.15);
 }
 
+/* ✅ Updated: button text always centered */
 .btn{
   height: 40px;
   padding: 0 14px;
@@ -135,6 +136,13 @@ button{ font-family: inherit; }
   cursor: pointer;
   font-weight: 650;
   white-space: nowrap;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1;
+  gap: 8px;
 }
 .btn:hover{ filter: brightness(0.98); }
 .btn:active{ transform: translateY(1px); }
@@ -516,11 +524,18 @@ body.modal-open{
   gap: 10px;
 }
 
+/* ✅ Updated: center small buttons too */
 .btn-sm{
   height: 34px;
   padding: 0 12px;
   border-radius: 12px;
   font-size: 13px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1;
 }
 
 .home-note-input{
